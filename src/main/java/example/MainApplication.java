@@ -1,3 +1,5 @@
+package example;
+
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -6,15 +8,27 @@ import org.glassfish.jersey.servlet.ServletContainer;
 
 public class MainApplication {
     public static void main(String[] args) throws Exception {
-        ServletContextHandler handler = buildUsingInitParameter();
-        Server server = new Server(8888);
-        server.setHandler(handler);
+        Server server = null;
         try {
+            server = createServer(8888);
             server.start();
             server.join();
         } finally {
-            server.destroy();
+            if(server != null) {
+                server.stop();
+                server.destroy();
+            }
         }
+    }
+
+    public static Server createServer(int port) throws Exception {
+        ServletContextHandler handler = buildUsingInitParameter();
+        Server server = new Server(port);
+        server.setHandler(handler);
+
+        //server.start();
+
+        return server;
     }
 
     static ServletContextHandler buildUsingInitParameter() {
@@ -25,7 +39,7 @@ public class MainApplication {
         servletHolder.setInitOrder(0);
         servletHolder.setInitParameter(
                 "jersey.config.server.provider.packages",
-                "apiresources;io.swagger.v3.jaxrs2.integration.resources"
+                "example.apiresources;io.swagger.v3.jaxrs2.integration.resources"
         );
 
         // provide swagger UI at base path
